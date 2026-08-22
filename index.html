@@ -977,7 +977,7 @@
     if(!DB.measures.length){ tbl.innerHTML=''; emp.style.display='block'; renderStats(); return; }
     emp.style.display='none';
     let head='<tr><th>指标</th>';
-    DB.measures.forEach(m=>head+='<th>'+m.label+'</th>');
+    DB.measures.forEach((m,idx)=>head+='<th>'+m.label+'<br><span class="editMeasure" data-idx="'+idx+'" style="color:var(--accent);cursor:pointer;font-size:11px;font-weight:400">✎改</span> <span class="delMeasure" data-idx="'+idx+'" style="color:var(--danger);cursor:pointer;font-size:11px;font-weight:400">✕删</span></th>');
     head+='<th>总变化</th></tr>';
     let body='';
     MFIELDS.forEach(([k,lab])=>{
@@ -993,6 +993,29 @@
       body+='<td>'+deltaCell+'</td></tr>';
     });
     tbl.innerHTML=head+body;
+    // 绑定删除
+    tbl.querySelectorAll('.delMeasure').forEach(el=>{
+      el.onclick=()=>{
+        const idx=parseInt(el.dataset.idx);
+        if(confirm('删除「'+DB.measures[idx].label+'」这条测量记录?')){
+          DB.measures.splice(idx,1); if(mEditIdx===idx) mClearForm(); save(); renderMeasures();
+        }
+      };
+    });
+    // 绑定编辑:把该条数据填回输入框
+    tbl.querySelectorAll('.editMeasure').forEach(el=>{
+      el.onclick=()=>{
+        const idx=parseInt(el.dataset.idx);
+        const m=DB.measures[idx];
+        document.getElementById('mDate').value=m.label||'';
+        [['w','m_w'],['bf','m_bf'],['waist','m_waist'],['belly','m_belly'],['chest','m_chest'],['hip','m_hip'],['arm','m_arm'],['thigh','m_thigh'],['neck','m_neck']].forEach(([k,id])=>{
+          document.getElementById(id).value = (m[k]!=null&&m[k]!=='')? m[k] : '';
+        });
+        mEditIdx=idx;
+        document.getElementById('addMeasureBtn').textContent='更新这条';
+        document.getElementById('mDate').scrollIntoView({behavior:'smooth',block:'center'});
+      };
+    });
     renderStats();
   }
   function renderStats(){
@@ -1018,15 +1041,27 @@
       g.appendChild(el);
     });
   }
+  let mEditIdx=null;
+  function mClearForm(){
+    ['m_w','m_bf','m_waist','m_belly','m_chest','m_hip','m_arm','m_thigh','m_neck','mDate'].forEach(id=>document.getElementById(id).value='');
+    mEditIdx=null;
+    document.getElementById('addMeasureBtn').textContent='保存这条测量';
+  }
   document.getElementById('addMeasureBtn').onclick=()=>{
     const rec={ label:document.getElementById('mDate').value.trim()||('第'+ (DB.measures.length+1) +'次') };
     [['w','m_w'],['bf','m_bf'],['waist','m_waist'],['belly','m_belly'],['chest','m_chest'],['hip','m_hip'],['arm','m_arm'],['thigh','m_thigh'],['neck','m_neck']].forEach(([k,id])=>{
       const v=document.getElementById(id).value;
       rec[k]= v===''?'':parseFloat(v);
     });
-    DB.measures.push(rec); save(); renderMeasures();
-    ['m_w','m_bf','m_waist','m_belly','m_chest','m_hip','m_arm','m_thigh','m_neck','mDate'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('addMeasureBtn').textContent='✓ 已保存';
+    if(mEditIdx!==null){
+      DB.measures[mEditIdx]=rec;   // 更新已有
+    } else {
+      DB.measures.push(rec);       // 新增
+    }
+    save(); renderMeasures();
+    const wasEdit = mEditIdx!==null;
+    mClearForm();
+    document.getElementById('addMeasureBtn').textContent = wasEdit ? '✓ 已更新' : '✓ 已保存';
     setTimeout(()=>document.getElementById('addMeasureBtn').textContent='保存这条测量',1200);
   };
 
