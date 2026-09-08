@@ -136,6 +136,16 @@
   .mtable .delta-up{color:var(--accent2)}
   .tablescroll{overflow-x:auto;margin:0 -6px}
 
+  /* workout program table */
+  .wtable{width:100%;min-width:460px;border-collapse:collapse;font-size:12.5px}
+  .wtable th,.wtable td{padding:8px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  .wtable th{color:var(--muted);font-weight:600;font-size:11px}
+  .wtable td:first-child{font-weight:600;color:var(--ink)}
+  .wtable td:nth-child(2){font-family:var(--mono);white-space:nowrap}
+  .wtable td:nth-child(4){white-space:nowrap}
+  .wtable a{color:var(--accent);text-decoration:none;font-weight:700}
+  .wtable a:hover{text-decoration:underline}
+
   .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
   .stat{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:14px}
   .stat .s-label{font-size:11px;color:var(--muted);margin-bottom:6px}
@@ -440,14 +450,39 @@
     </div>
 
     <div class="card">
-      <h2>训练分化(每周3–4练)</h2>
-      <div id="splitList">
-        <div class="split-row"><span class="d">A 推</span><span class="w">胸 + 肩 + 三头 · 练后 Zone2 走 20min</span></div>
-        <div class="split-row"><span class="d">B 拉</span><span class="w">背 + 二头 · 练后 Zone2 走 20min</span></div>
-        <div class="split-row"><span class="d">C 腿+核心</span><span class="w">腿 + 腹斜 · 最重的一天→适合当补碳日</span></div>
-        <div class="split-row"><span class="d">循环</span><span class="w">A→B→C→A… 每周练3–4次,其余休息日走8000步</span></div>
-      </div>
-      <div class="note"><b>渐进超负荷是腹线唯一的来源</b>:每次记重量×次数,下次加1次或加重量。减脂期力量「保住」就是胜利。腹肌靠低体脂显形,不是靠多练卷腹。</div>
+      <h2>训练分化 · A/B/C 循环</h2>
+      <div class="hint">新手版:每天4–5个动作、以复合为主,效果≈多动作版。A→B→C 循环,每周练3–4次,其余休息日走8000步。</div>
+      <div class="note" style="margin:0 0 16px"><b>通用规则</b>:每个动作先用轻重量热身1组;正式组留1–2次在膛里,最后一组逼近力竭;组间歇60–90秒。练完在「健身」页记重量×次数——<b>下次要么加重量、要么多1次(渐进超负荷),这是腹线唯一的来源。</b></div>
+
+      <div class="plan-sec"><h3>🅰 A 天 · 推(胸 / 肩 / 三头)</h3></div>
+      <div class="tablescroll"><table class="wtable">
+        <tr><th>动作</th><th>组×次</th><th>说明</th><th>视频</th></tr>
+        <tr><td>胸推(机器 / 哑铃卧推)</td><td>3 × 8–12</td><td>主项,肩胛后收下沉,下放到胸口再推</td><td><a href="https://www.youtube.com/results?search_query=dumbbell+bench+press+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>龙门架夹胸 / 哑铃飞鸟</td><td>3 × 12–15</td><td>用胸把手合拢,顶峰挤1秒</td><td><a href="https://www.youtube.com/results?search_query=cable+crossover+chest+fly" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>坐姿哑铃推肩</td><td>3 × 8–12</td><td>核心收紧不塌腰,推到接近伸直</td><td><a href="https://www.youtube.com/results?search_query=seated+dumbbell+shoulder+press+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>侧平举</td><td>3 × 12–15</td><td>轻重量,抬到与肩平别甩</td><td><a href="https://www.youtube.com/results?search_query=dumbbell+lateral+raise+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>三头绳索下压</td><td>3 × 10–15</td><td>大臂夹住不动,只小臂动</td><td><a href="https://www.youtube.com/results?search_query=tricep+rope+pushdown+form" target="_blank" rel="noopener">看▸</a></td></tr>
+      </table></div>
+
+      <div class="plan-sec" style="margin-top:16px"><h3>🅱 B 天 · 拉(背 / 二头 / 后肩)</h3></div>
+      <div class="tablescroll"><table class="wtable">
+        <tr><th>动作</th><th>组×次</th><th>说明</th><th>视频</th></tr>
+        <tr><td>高位下拉</td><td>3 × 8–12</td><td>主项,把肘往下往兜里拉,别用手臂发力</td><td><a href="https://www.youtube.com/results?search_query=lat+pulldown+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>坐姿划船</td><td>3 × 8–12</td><td>挺胸,肩胛往中间夹,拉到肚脐</td><td><a href="https://www.youtube.com/results?search_query=seated+cable+row+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>面拉 face pull</td><td>3 × 15</td><td>练后肩+护肩,绳索拉向额头两侧</td><td><a href="https://www.youtube.com/results?search_query=face+pull+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>哑铃弯举</td><td>3 × 10–12</td><td>大臂不动,别晃身体借力</td><td><a href="https://www.youtube.com/results?search_query=dumbbell+bicep+curl+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>锤式弯举(时间够就加)</td><td>2 × 12</td><td>补前臂/肱肌,拳心相对</td><td><a href="https://www.youtube.com/results?search_query=hammer+curl+form" target="_blank" rel="noopener">看▸</a></td></tr>
+      </table></div>
+
+      <div class="plan-sec" style="margin-top:16px"><h3>🅲 C 天 · 腿 + 核心(无腿举机 · 最重的一天→适合当补碳日)</h3></div>
+      <div class="tablescroll"><table class="wtable">
+        <tr><th>动作</th><th>组×次</th><th>说明</th><th>视频</th></tr>
+        <tr><td>高脚杯深蹲(抱哑铃)</td><td>3 × 10–12</td><td>主项,下到大腿接近水平,膝顺脚尖</td><td><a href="https://www.youtube.com/results?search_query=goblet+squat+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>哑铃罗马尼亚硬拉</td><td>3 × 10–12</td><td>练腿后+臀,下放到大腿后有拉伸,别弓背</td><td><a href="https://www.youtube.com/results?search_query=dumbbell+romanian+deadlift+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>保加利亚分腿蹲</td><td>3 × 8–12/腿</td><td>单腿刺激最狠,后脚搭凳握哑铃</td><td><a href="https://www.youtube.com/results?search_query=bulgarian+split+squat+dumbbell+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>站姿提踵(握哑铃踩台阶)</td><td>3 × 15–20</td><td>小腿,底部拉伸、顶部踮到最高</td><td><a href="https://www.youtube.com/results?search_query=standing+calf+raise+dumbbell+form" target="_blank" rel="noopener">看▸</a></td></tr>
+        <tr><td>核心:平板支撑</td><td>3 × 40秒</td><td>收紧别塌腰;想加就配死虫</td><td><a href="https://www.youtube.com/results?search_query=plank+exercise+form" target="_blank" rel="noopener">看▸</a></td></tr>
+      </table></div>
     </div>
 
     <div class="card">
