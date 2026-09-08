@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>30天减脂追踪 · Kiren</title>
+<title>薄肌重组计划 · Kiren</title>
 <style>
   :root{
     --bg:#0f1417;
@@ -144,11 +144,27 @@
 
   .empty{text-align:center;color:var(--dim);padding:30px 10px;font-size:13px}
 
-  /* progress mini bar for 30 day */
-  .prog30{display:flex;gap:3px;margin:12px 0}
-  .prog30 .d{flex:1;height:26px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);font-size:9px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--mono);cursor:pointer}
+  /* day type selector */
+  .dtype{display:flex;gap:6px;margin-bottom:10px}
+  @media(max-width:560px){.dtype{flex-wrap:wrap}}
+  .dtype button{flex:1;min-width:70px;padding:9px 4px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;line-height:1.25}
+  .dtype button small{display:block;font-family:var(--mono);font-size:10px;font-weight:400;color:var(--dim);margin-top:2px}
+  .dtype button:hover{border-color:var(--accent)}
+  .dtype button.on[data-t="train"]{background:#12261f;border-color:var(--accent);color:var(--accent)}
+  .dtype button.on[data-t="rest"]{background:#161d21;border-color:var(--muted);color:var(--ink)}
+  .dtype button.on[data-t="refeed"]{background:#2a2313;border-color:var(--carb);color:#e6c05a}
+  .dtype button.on[data-t="free"]{background:#2a1815;border-color:var(--accent2);color:var(--accent2)}
+  .dtype button.on small{color:inherit;opacity:.8}
+
+  /* progress mini bar for the cycle */
+  .prog30{display:flex;flex-wrap:wrap;gap:4px;margin:12px 0}
+  .prog30 .d{flex:0 0 auto;width:30px;height:26px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);font-size:9px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--mono);cursor:pointer;position:relative}
   .prog30 .d.logged{background:#13342a;border-color:var(--accent);color:var(--accent)}
-  .prog30 .d.today{outline:2px solid var(--accent)}
+  .prog30 .d.today{outline:2px solid var(--accent);outline-offset:1px}
+  .prog30 .d.refeedcand:after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--carb)}
+  .prog30 .d.t-train{border-color:var(--accent)}
+  .prog30 .d.t-refeed{background:#2a2313;border-color:var(--carb);color:#e6c05a}
+  .prog30 .d.t-free{background:#2a1815;border-color:var(--accent2);color:var(--accent2)}
 
   .note{background:var(--panel2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:11px 13px;font-size:12.5px;color:var(--muted);margin-top:12px}
   .note b{color:var(--ink)}
@@ -170,8 +186,8 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="title">30天<span class="accent">薄肌</span>计划</div>
-    <div class="sub">稳健方案 · 目标 75.35kg → ~71kg · 体脂 ~19% → ~17% · 保肌肉优先</div>
+    <div class="title">薄肌<span class="accent">重组</span>计划</div>
+    <div class="sub">84天慢刀重组 · 74.45kg / 体脂~17% → ~72kg / ~12-13% · 保肌降脂 · 练出腹线</div>
   </header>
 
   <div class="tabs">
@@ -194,6 +210,9 @@
         <button class="btn ghost sm" id="todayBtn">今天</button>
       </div>
 
+      <div class="dtype" id="dtypeRow"></div>
+      <div class="note" id="dtypeHint" style="margin:0 0 14px;padding:9px 12px"></div>
+
       <div class="toprow">
         <div class="ring">
           <svg width="140" height="140" viewBox="0 0 140 140">
@@ -203,21 +222,21 @@
           </svg>
           <div class="center">
             <div class="kcal" id="kcalNow">0</div>
-            <div class="kcallabel">/ 1950 kcal</div>
-            <div class="rem" id="kcalRem">还剩 1950</div>
+            <div class="kcallabel">/ <span id="kcalTgt">2000</span> kcal</div>
+            <div class="rem" id="kcalRem">还剩 2000</div>
           </div>
         </div>
         <div class="macros">
           <div class="macro m-p">
-            <div class="mtop"><span class="mname">蛋白质</span><span class="mval"><span id="pNow">0</span> / 150g</span></div>
+            <div class="mtop"><span class="mname">蛋白质</span><span class="mval"><span id="pNow">0</span> / <span id="pTgt">165</span>g</span></div>
             <div class="bar"><span id="pBar" style="width:0"></span></div>
           </div>
           <div class="macro m-c">
-            <div class="mtop"><span class="mname">碳水</span><span class="mval"><span id="cNow">0</span> / 185g</span></div>
+            <div class="mtop"><span class="mname">碳水</span><span class="mval"><span id="cNow">0</span> / <span id="cTgt">200</span>g</span></div>
             <div class="bar"><span id="cBar" style="width:0"></span></div>
           </div>
           <div class="macro m-f">
-            <div class="mtop"><span class="mname">脂肪</span><span class="mval"><span id="fNow">0</span> / 65g</span></div>
+            <div class="mtop"><span class="mname">脂肪</span><span class="mval"><span id="fNow">0</span> / <span id="fTgt">60</span>g</span></div>
             <div class="bar"><span id="fBar" style="width:0"></span></div>
           </div>
         </div>
@@ -225,11 +244,6 @@
       <div class="note" id="deficitNote">缺口目标约 480 kcal/天。今天先去「热量计算」加食物,数据会自动累计到这里。</div>
     </div>
 
-    <div class="card">
-      <h2>今日打卡</h2>
-      <div class="hint">吃 · 练 · 走 · 睡,四件事管住就赢了</div>
-      <div class="checks" id="checkList"></div>
-    </div>
 
     <div class="card">
       <h2>今日体重 · 步数</h2>
@@ -242,8 +256,8 @@
     </div>
 
     <div class="card">
-      <h2>30天进度</h2>
-      <div class="hint">绿=已记录。点格子跳转到那天</div>
+      <h2>84天进度</h2>
+      <div class="hint">绿=已记录 · 右上角小黄点=补碳候选日 · 点格子跳到那天</div>
       <div class="prog30" id="prog30"></div>
     </div>
   </div>
@@ -251,38 +265,8 @@
   <!-- ============ 食物热量计算 ============ -->
   <div class="view" id="view-food">
     <div class="card">
-      <h2>食物热量计算器</h2>
-      <div class="hint">选常用食物或手动加。输入克重/份数,自动算 kcal 和三大营养素,并累计到当天。</div>
-
-      <div class="db" style="margin-bottom:6px;color:var(--dim);font-family:var(--mono);font-size:11px;">常用库(点击填入)</div>
-      <div id="dbChips"></div>
-
-      <div style="border-top:1px solid var(--line);margin:16px 0 12px"></div>
-
-      <div class="field"><label>食物名称</label><input type="text" id="fName" placeholder="例:鸡胸肉"></div>
-      <div class="grid3">
-        <div class="field"><label>数量</label><input type="number" step="0.1" id="fQty" placeholder="150"></div>
-        <div class="field"><label>单位</label>
-          <select id="fUnit"><option value="g">克 g</option><option value="lb">磅 lb</option><option value="oz">盎司 oz</option><option value="serving">份</option></select>
-        </div>
-        <div class="field"><label>每100g热量</label><input type="number" id="fKcal100" placeholder="165"></div>
-      </div>
-      <div class="grid3">
-        <div class="field"><label>蛋白 /100g</label><input type="number" step="0.1" id="fP100" placeholder="31"></div>
-        <div class="field"><label>碳水 /100g</label><input type="number" step="0.1" id="fC100" placeholder="0"></div>
-        <div class="field"><label>脂肪 /100g</label><input type="number" step="0.1" id="fF100" placeholder="3.6"></div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
-        <button class="btn" id="addFoodBtn">加入今日 (Day <span id="foodDayLabel">1</span>)</button>
-        <span id="calcPreview" class="db" style="font-family:var(--mono)"></span>
-      </div>
-
-      <div class="foodlist" id="foodList"></div>
-    </div>
-
-    <div class="card">
-      <h2>快速录入(整份直接填)</h2>
-      <div class="hint">已知一份的总热量和总营养素时用这个,不用每100g换算。可存成常用组合,下次一键加。</div>
+      <h2>快速录入 · 加入今日 (Day <span id="foodDayLabel">1</span>)</h2>
+      <div class="hint">直接填一餐的总热量和三大营养素,加入当天自动累计。可存成常用组合,下次一键加。</div>
       <div class="field"><label>名称</label><input type="text" id="cbName" placeholder="例:我的brunch贝果套餐"></div>
       <div class="field"><label>份量描述(可选)</label><input type="text" id="cbPortion" placeholder="例:1个贝果+2蛋+黄油 / 200g"></div>
       <div class="grid2">
@@ -298,6 +282,10 @@
         <button class="btn ghost" id="cbSaveBtn">存为常用组合</button>
         <span id="cbEditHint" class="db" style="align-self:center;font-family:var(--mono);color:var(--accent2)"></span>
       </div>
+
+      <div style="border-top:1px solid var(--line);margin:16px 0 12px"></div>
+      <div class="db" style="color:var(--accent);font-family:var(--mono);font-size:11px;margin-bottom:8px">今日已加(Day <span id="foodDayLabel2">1</span>) · ✕删除</div>
+      <div class="foodlist" id="foodList"></div>
 
       <div id="comboLib" style="margin-top:16px"></div>
     </div>
@@ -373,7 +361,7 @@
 
     <div class="card">
       <h2>新增一条测量记录</h2>
-      <div class="hint">晨起空腹测最准。基线已按你给的数据预填</div>
+      <div class="hint">晨起空腹测最准。体脂留空时,填了颈围+腹围会用海军公式自动算</div>
       <div class="field"><label>日期标签</label><input type="text" id="mDate" placeholder="例:Day 1 / 第2周"></div>
       <div class="grid3">
         <div class="field"><label>体重 kg</label><input type="number" step="0.05" id="m_w"></div>
@@ -406,45 +394,73 @@
   <!-- ============ 计划 ============ -->
   <div class="view" id="view-plan">
     <div class="card">
-      <h2>30天数字(稳健方案)</h2>
-      <div class="plan-sec">
-        <h3>每日营养</h3>
-        <ul>
-          <li>总热量 <b>1,950 kcal</b>(缺口约480/天)</li>
-          <li>蛋白质 <b>150g</b> ≈ 2g/kg,减脂保肌肉命脉</li>
-          <li>脂肪 <b>65g</b> · 碳水 <b>185g</b></li>
-          <li>每周预期掉秤 <b>0.4–0.5kg</b>,慢=保肌肉</li>
-          <li>30天预期:约 <b>71kg / 体脂 ~17%</b>,肌肉饱满有线条</li>
-        </ul>
-      </div>
-      <div class="note"><b>为什么不是激进的16%?</b> 30天减到16%需每天缺口670+,蛋白稍不足就掉肌肉,还容易情绪性反弹。17%但肌肉留得住,看起来比16%干瘪更接近你要的「薄肌」。想更狠可继续第二个月。</div>
+      <h2>🧮 我的实时计算器</h2>
+      <div class="hint">用「测量对比」里最新一条数据实时算。体脂用 US Navy 海军法(男性量脐水平=腹围),代谢用 Katch-McArdle。体重掉多了记得回来看,目标会跟着重算。</div>
+      <div class="statgrid" id="calcGrid"></div>
+      <div class="note" id="calcNote"></div>
     </div>
 
     <div class="card">
-      <h2>训练分化</h2>
-      <div id="splitList">
-        <div class="split-row"><span class="d">周一</span><span class="w">胸 + 三头 · 练后 Zone2 走 20min</span></div>
-        <div class="split-row"><span class="d">周二</span><span class="w">休 · 走 8000步</span></div>
-        <div class="split-row"><span class="d">周三</span><span class="w">背 + 二头 · 练后 Zone2 走 20min</span></div>
-        <div class="split-row"><span class="d">周四</span><span class="w">休 · 走 8000步(想加HIIT就今天,15min)</span></div>
-        <div class="split-row"><span class="d">周五</span><span class="w">腹 + 斜 · 练后 Zone2 走 20min</span></div>
-        <div class="split-row"><span class="d">周六</span><span class="w">休 · 走 8000步</span></div>
-        <div class="split-row"><span class="d">周日</span><span class="w">肩 + 腿 · 练后 Zone2 走 15min</span></div>
+      <h2>每日营养 · 按日类型循环</h2>
+      <div class="hint">周均≈2000 kcal(约350赤字,~0.3kg脂肪/周)。碳水在训练日堆高、休息日压低——能量给到长肌肉的时候。</div>
+      <div class="tablescroll">
+        <table class="mtable" id="dtypeTable"></table>
       </div>
-      <div class="note"><b>渐进超负荷</b>是线条的唯一来源:每次记重量×次数,下次加1次或加重量。减脂期力量「保住」就是胜利。</div>
+      <div class="plan-sec" style="margin-top:14px">
+        <h3>为什么这样吃</h3>
+        <ul>
+          <li>蛋白 <b>165g</b> ≈ 2.2g/kg,每天不变——减脂保肌的绝对命脉</li>
+          <li>脂肪 <b>60g</b> = 0.8g/kg,激素下限;省下的热量全给碳水</li>
+          <li>训练日碳水 <b>237g</b> / 休息日 <b>163g</b>,把糖原和能量分配给训练</li>
+          <li>84天预期:74.45kg/~17% → 约 <b>72kg / 12–13%</b>,瘦体重持平或微增,腹围86→~80,<b>腹线显形</b></li>
+        </ul>
+      </div>
+      <div class="note"><b>为什么是慢刀不是猛冲?</b> 你21岁、17%、有训练基础——这是身体重组的黄金条件:小赤字+高蛋白+渐进负重,可以一边掉脂一边长肌。赤字拉太狠只会掉肌肉、掉线条、易反弹。慢=薄肌。</div>
+    </div>
+
+    <div class="card">
+      <h2>🍚 放纵日 / 补碳日(你自己在「每日」里点)</h2>
+      <div class="plan-sec">
+        <h3>两个概念别搞混</h3>
+        <ul>
+          <li><b>补碳日 Refeed(2500kcal)</b>:升到维持热量、几乎全靠碳水,蛋白不变、脂肪压住。有科学依据:回补肌糖原、拉回瘦素/T3、缓解节食疲劳、下次练更猛。<b>不是随便吃。</b></li>
+          <li><b>自由日 Free(~2800kcal)</b>:真正放开,频率低很多,每3–4周最多一次。</li>
+        </ul>
+      </div>
+      <div class="plan-sec">
+        <h3>科学节点(网页已按此标黄点)</h3>
+        <ul>
+          <li><b>周期内</b>:17%这个体脂,<b>每10–14天一次</b>够了;掉到13%以下再加密到每7天</li>
+          <li><b>周内</b>:只放<b>训练日</b>,且是最重/腿日那次,<b>练后</b>那一餐——胰岛素敏感、糖原窗口开着,多的热量更多进肌肉</li>
+          <li><b>禁忌</b>:别放休息日(糖原满、更易转脂)、别连着两天</li>
+          <li><b>候选节点</b>:第 <b>12 / 24 / 36 / 48 / 60 / 72 / 84</b> 天(进度条上带小黄点)——就近挪到你那几天最重的训练日</li>
+        </ul>
+      </div>
+      <div class="note">操作:进度条上有黄点的日子,如果你当天练了大重量,就在「每日」页把日类型点成<b>「补碳日」</b>,目标自动升到2500/碳水314g。不想补就保持休息/训练日。</div>
+    </div>
+
+    <div class="card">
+      <h2>训练分化(每周3–4练)</h2>
+      <div id="splitList">
+        <div class="split-row"><span class="d">A 推</span><span class="w">胸 + 肩 + 三头 · 练后 Zone2 走 20min</span></div>
+        <div class="split-row"><span class="d">B 拉</span><span class="w">背 + 二头 · 练后 Zone2 走 20min</span></div>
+        <div class="split-row"><span class="d">C 腿+核心</span><span class="w">腿 + 腹斜 · 最重的一天→适合当补碳日</span></div>
+        <div class="split-row"><span class="d">循环</span><span class="w">A→B→C→A… 每周练3–4次,其余休息日走8000步</span></div>
+      </div>
+      <div class="note"><b>渐进超负荷是腹线唯一的来源</b>:每次记重量×次数,下次加1次或加重量。减脂期力量「保住」就是胜利。腹肌靠低体脂显形,不是靠多练卷腹。</div>
     </div>
 
     <div class="card">
       <h2>有氧与心率</h2>
       <div class="plan-sec">
-        <h3>最大心率 ≈ 193 bpm</h3>
+        <h3>最大心率 ≈ 199 bpm(21岁)</h3>
         <ul>
-          <li>Zone 2(<b>116–135</b>):主用,保肌肉易恢复</li>
-          <li>Zone 3(135–155):心肺</li>
-          <li>Zone 4-5(155–193):HIIT,压恢复,每周≤1次</li>
+          <li>Zone 2(<b>119–139</b>):主用,保肌肉易恢复</li>
+          <li>Zone 3(139–159):心肺</li>
+          <li>Zone 4-5(159–199):HIIT,压恢复,每周≤1次</li>
         </ul>
       </div>
-      <div class="note"><b>走路是最大红利</b>:每天8000步不掉肌肉不压恢复,比跑步机HIIT更值。<b>别用有氧代替饮食缺口</b>——走40分钟≈少一杯含糖饮料,后者更轻松。</div>
+      <div class="note"><b>走路是最大红利</b>:久坐一天NEAT很低,每天8000步不掉肌肉不压恢复,比跑步机HIIT更值。<b>别用有氧代替饮食缺口</b>——赤字主要靠吃,有氧是补充。</div>
     </div>
 
     <div class="card">
@@ -452,16 +468,15 @@
       <div class="plan-sec">
         <h3>三个决定成败的点</h3>
         <ul>
-          <li><b>管住「馋」</b>:你说更像馋不是饿,焦虑时易犯。馋来了先喝水→走两步→等15分钟</li>
-          <li><b>保肌肉</b>:蛋白拉满150g + 力量不断档 + 有氧别过量</li>
-          <li><b>把走路提上来</b>:从300–2000步 → 8000步,这是你最大浪费也是最大机会</li>
+          <li><b>肚子不显线条=体脂问题,不是肌肉不够</b>:男性通常~12–13%才见腹线,下腹更晚。杠杆是降脂保肌</li>
+          <li><b>保肌肉</b>:蛋白每天165g + 力量不断档 + 赤字别拉太狠</li>
+          <li><b>久坐是最大浪费</b>:把日常步数提上来,这是你TDEE里最容易拿的一块</li>
         </ul>
       </div>
       <div class="plan-sec">
         <h3>肠道与消化</h3>
         <ul>
           <li>纤维每天:菠菜/绿豆角 + 香蕉 + 奇亚籽</li>
-          <li>继续益生菌改善大便不成形</li>
           <li>水2升/天;餐后等20–30分钟再躺</li>
         </ul>
       </div>
@@ -484,8 +499,25 @@
 
 <script>
 (function(){
+  // ---------- config ----------
+  const CYCLE = 84;                 // 12周重组周期
+  const PROFILE = { height:185, age:21, sex:'M' };  // 身高cm/年龄/性别
+  const BASELINE = { label:'Day 1 基线', w:74.45, bf:17, waist:78, belly:86, chest:'', hip:'', arm:'', thigh:'', neck:36 };
+
+  // 日类型营养目标(见计划页计算)
+  const DAYTYPE = {
+    train : { name:'训练日', kcal:2150, p:165, c:237, f:60, tip:'练后碳水前移。碳水堆在今天,练得动、更容易长肌肉。' },
+    rest  : { name:'休息日', kcal:1850, p:165, c:163, f:60, tip:'不练=少吃碳水,继续保持赤字。蛋白照样拉满165g。' },
+    refeed: { name:'补碳日', kcal:2500, p:165, c:314, f:65, tip:'升到维持热量、几乎全靠碳水:回补糖原、拉回瘦素、缓解节食疲劳。放训练日、练后那餐最优。' },
+    free  : { name:'自由日', kcal:2800, p:150, c:'', f:'', tip:'真正放开一餐。每3-4周最多一次,同样放在训练日。蛋白仍尽量≥150g。' }
+  };
+  const DTYPE_ORDER = ['train','rest','refeed','free'];
+  function targetsFor(t){ const o=DAYTYPE[t]||DAYTYPE.rest; return {kcal:o.kcal,p:o.p,c:o.c,f:o.f}; }
+  // 补碳候选节点:每~12天一次(落在训练日最优)
+  function isRefeedCand(n){ return n>=12 && n%12===0; }
+
   // ---------- storage ----------
-  const KEY='cut30_kiren_v1';
+  const KEY='cut30_kiren_v2';
   let DB = { start:null, days:{}, measures:[] };
   let memFallback=false; // 若浏览器禁本地存储,退到内存(至少本次会话不丢)
   function rawGet(){
@@ -501,7 +533,7 @@
     if(!DB.measures) DB.measures=[];
     if(!DB.combos) DB.combos=[];
     if(DB.measures.length===0){
-      DB.measures.push({label:'Day 1 基线', w:75.35, bf:19, waist:94, belly:89, chest:87, hip:97, arm:28, thigh:54, neck:36});
+      DB.measures.push(Object.assign({}, BASELINE));
       rawSet(JSON.stringify(DB));
     }
   }
@@ -517,101 +549,39 @@
     },400);
   }
 
-  // ---------- targets ----------
-  const T = { kcal:1950, p:150, c:185, f:65 };
-
   // ---------- day state ----------
-  let curDay = 1; // 1..30
+  let curDay = 1; // 1..CYCLE
   function dayKey(n){ return 'd'+n; }
   function getDay(n){
     const k=dayKey(n);
-    if(!DB.days[k]) DB.days[k]={foods:[],checks:{},w:'',steps:'',note:'',workouts:[]};
+    if(!DB.days[k]) DB.days[k]={foods:[],checks:{},w:'',steps:'',note:'',workouts:[],dtype:''};
     if(!DB.days[k].foods) DB.days[k].foods=[];
     if(!DB.days[k].checks) DB.days[k].checks={};
     if(!DB.days[k].workouts) DB.days[k].workouts=[];
+    if(!DB.days[k].dtype) DB.days[k].dtype = 'rest';  // 默认休息日;补碳/自由由你自己点选
     return DB.days[k];
   }
+  // 当前生效目标 = 当天日类型对应目标
+  function curTargets(n){ return targetsFor(getDay(n).dtype); }
   function dateForDay(n){
     const d=new Date(DB.start+'T00:00:00'); d.setDate(d.getDate()+(n-1));
     return d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'});
   }
-
-  // ---------- checklist def ----------
-  const CHECKS=[
-    {id:'kcal',t:'热量达标',s:'控制在 ~1950 kcal 缺口内'},
-    {id:'protein',t:'蛋白 150g',s:'保肌肉的命脉'},
-    {id:'strength',t:'力量训练 / 或休息日',s:'渐进超负荷,记重量×次数'},
-    {id:'cardio',t:'练后 Zone2 有氧',s:'心率 116–135,20分钟'},
-    {id:'steps',t:'走路 8000步',s:'你最大的减脂红利'},
-    {id:'fiber',t:'纤维 + 益生菌',s:'菠菜/香蕉/奇亚籽 + 益生菌'},
-    {id:'water',t:'喝水 2L',s:'习惯锚点定时喝'},
-    {id:'crave',t:'管住「馋」',s:'没有情绪性夜宵/甜食'},
-    {id:'sleep',t:'睡够 7–8h',s:'恢复是天花板'}
-  ];
-
-  // ---------- food DB ----------
-  // 每100g数据。GV产品用沃尔玛官网/官方标签换算(标签份112g),其余USDA标准值
-  const FOODDB=[
-    // —— 蛋白(GV官方标签换算)——
-    {n:'GV鸡胸柳(生)',kcal:89,p:19.6,c:0,f:0.4,tag:'蛋白'},   // 4oz/112g=100kcal 22P 0.5F
-    {n:'93/7牛肉馅(生)',kcal:152,p:20.5,c:0,f:7,tag:'蛋白'},  // 4oz=170 23P 8F
-    {n:'80/20牛肉chuck(生)',kcal:250,p:17,c:0,f:19.6,tag:'蛋白'}, // 4oz=280 19P 22F
-    {n:'Sirloin牛排(生)',kcal:143,p:21.4,c:0,f:5.4,tag:'蛋白'},   // 4oz≈160 24P 6F
-    {n:'鸡腿去皮(生)',kcal:121,p:20,c:0,f:4.5,tag:'蛋白'},
-    {n:'鸡蛋(全,1个≈50g)',kcal:143,p:13,c:1,f:10,tag:'蛋白'},
-    {n:'豆腐(老)',kcal:76,p:8,c:2,f:4.8,tag:'蛋白'},
-    {n:'Orgain蛋白粉',kcal:455,p:194,c:45,f:18,tag:'蛋白'}, // 每33g勺≈150kcal 64P
-    {n:'希腊酸奶',kcal:59,p:10,c:3.6,f:0.4,tag:'蛋白'},
-    {n:'牛奶',kcal:52,p:3.4,c:5,f:2,tag:'蛋白'},
-    // —— 主食(干重!煮后翻倍热量不变)——
-    {n:'GV Rotini意面(干)',kcal:357,p:12,c:73,f:1.5,tag:'主食'}, // ¾杯56g=200
-    {n:'GV长意面(干)',kcal:357,p:12,c:73,f:1.5,tag:'主食'},
-    {n:'GV长粒米(干)',kcal:360,p:7,c:79,f:0.6,tag:'主食'},
-    {n:'米饭(熟)',kcal:130,p:2.4,c:28,f:0.3,tag:'主食'},
-    {n:'土豆(生)',kcal:77,p:2,c:17,f:0.1,tag:'主食'},
-    {n:'燕麦(干)',kcal:389,p:17,c:66,f:7,tag:'主食'},
-    {n:'贝果(1个≈95g)',kcal:250,p:10,c:49,f:1.5,tag:'主食'},
-    {n:'面包片(1片≈28g)',kcal:75,p:2.6,c:14,f:1,tag:'主食'},
-    // —— 酱/罐头/蔬果 ——
-    {n:'GV番茄罗勒蒜酱',kcal:47,p:1.6,c:7,f:1.6,tag:'酱菜'}, // ½杯128g=60
-    {n:'GV玉米罐头(沥干)',kcal:82,p:2.5,c:18,f:0.8,tag:'酱菜'},
-    {n:'冷冻西兰花',kcal:34,p:2.8,c:7,f:0.4,tag:'蔬菜'},
-    {n:'冷冻胡萝卜绿豆丁',kcal:45,p:2,c:9,f:0.2,tag:'蔬菜'},
-    {n:'onion pepper冷冻包',kcal:30,p:1,c:6,f:0.2,tag:'蔬菜'},
-    {n:'紫洋葱',kcal:40,p:1.1,c:9,f:0.1,tag:'蔬菜'},
-    {n:'彩椒',kcal:31,p:1,c:6,f:0.3,tag:'蔬菜'},
-    {n:'芹菜',kcal:16,p:0.7,c:3,f:0.2,tag:'蔬菜'},
-    {n:'黄瓜',kcal:15,p:0.7,c:3.6,f:0.1,tag:'蔬菜'},
-    {n:'生菜',kcal:15,p:1.4,c:2.9,f:0.2,tag:'蔬菜'},
-    {n:'菠菜',kcal:23,p:2.9,c:3.6,f:0.4,tag:'蔬菜'},
-    {n:'胡萝卜',kcal:41,p:0.9,c:10,f:0.2,tag:'蔬菜'},
-    {n:'香蕉',kcal:89,p:1.1,c:23,f:0.3,tag:'水果'},
-    {n:'冷冻蓝莓',kcal:57,p:0.7,c:14,f:0.3,tag:'水果'},
-    {n:'冷冻莓果混合',kcal:50,p:0.7,c:12,f:0.3,tag:'水果'},
-    {n:'冷冻菠萝',kcal:50,p:0.5,c:13,f:0.1,tag:'水果'},
-    // —— 脂肪/其他 ——
-    {n:'牛油果',kcal:160,p:2,c:9,f:15,tag:'脂肪'},
-    {n:'花生酱',kcal:588,p:25,c:20,f:50,tag:'脂肪'},
-    {n:'奇亚籽',kcal:486,p:17,c:42,f:31,tag:'脂肪'},
-    {n:'橄榄油(1勺≈14g)',kcal:884,p:0,c:0,f:100,tag:'脂肪'},
-    {n:'黄油(TX小面包配)',kcal:717,p:0.9,c:0.1,f:81,tag:'脂肪'}
-  ];
-
-  // 5道主菜——整份直接加(已按份量算好总量,单位选「份」)
-  const MEALS=[
-    {n:'①鸡腿土豆西兰花',kcal:550,p:45,c:38,f:22},
-    {n:'②牛肉洋葱彩椒炒饭(93/7)',kcal:580,p:40,c:60,f:16},
-    {n:'③牛排土豆蔬菜',kcal:620,p:48,c:35,f:30},
-    {n:'④番茄肉酱意面',kcal:600,p:35,c:78,f:16},
-    {n:'⑤豆腐鸡蛋蔬菜盖饭',kcal:500,p:30,c:52,f:16}
-  ];
 
   // ---------- render today ----------
   function renderToday(){
     document.getElementById('dayNum').textContent='Day '+curDay;
     document.getElementById('dayDate').textContent=dateForDay(curDay);
     document.getElementById('foodDayLabel').textContent=curDay;
+    document.getElementById('foodDayLabel2').textContent=curDay;
     const d=getDay(curDay);
+    renderDtype();
+    const T=curTargets(curDay);
+    // dynamic target labels
+    document.getElementById('kcalTgt').textContent=T.kcal;
+    document.getElementById('pTgt').textContent=T.p;
+    document.getElementById('cTgt').textContent=(T.c===''?'—':T.c);
+    document.getElementById('fTgt').textContent=(T.f===''?'—':T.f);
     // totals
     let tk=0,tp=0,tc=0,tf=0;
     d.foods.forEach(f=>{tk+=f.kcal;tp+=f.p;tc+=f.c;tf+=f.f;});
@@ -623,23 +593,14 @@
     const frac=Math.min(tk/T.kcal,1);
     document.getElementById('ringFill').style.strokeDashoffset = 377*(1-frac);
     document.getElementById('ringFill').style.stroke = tk>T.kcal?'var(--danger)':'var(--accent)';
-    setMacro('p',tp,T.p);setMacro('c',tc,T.c);setMacro('f',tf,T.f);
+    setMacro('p',tp,T.p);setMacro('c',tc||1,T.c||9999);setMacro('f',tf||1,T.f||9999);
     // deficit note
     const dn=document.getElementById('deficitNote');
-    if(tk===0){ dn.innerHTML='缺口目标约 480 kcal/天。去「热量计算」加食物,自动累计到这里。'; }
+    const tname=(DAYTYPE[d.dtype]||DAYTYPE.rest).name;
+    if(tk===0){ dn.innerHTML='今天是<b>'+tname+'</b>,目标 <b>'+T.kcal+' kcal</b>。去「热量计算」加食物,自动累计到这里。'; }
     else if(rem>200){ dn.innerHTML='还可以吃 <b>'+rem+' kcal</b>。蛋白还差 <b>'+Math.max(0,T.p-tp)+'g</b>,优先补蛋白。'; }
-    else if(rem>=0){ dn.innerHTML='接近目标,缺口大约就位。蛋白差 <b>'+Math.max(0,T.p-tp)+'g</b>。'; }
-    else { dn.innerHTML='今天超了 <b>'+(-rem)+' kcal</b>,缺口被吃掉了。明天补回,或今晚多走2000步。'; }
-    // checks
-    const cl=document.getElementById('checkList'); cl.innerHTML='';
-    CHECKS.forEach(c=>{
-      const on=!!d.checks[c.id];
-      const el=document.createElement('div');
-      el.className='check'+(on?' done':'');
-      el.innerHTML='<div class="cbox"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-6" stroke="#06231a" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ctext"><div class="ct-title">'+c.t+'</div><div class="ct-sub">'+c.s+'</div></div>';
-      el.onclick=()=>{ d.checks[c.id]=!d.checks[c.id]; save(); renderToday(); };
-      cl.appendChild(el);
-    });
+    else if(rem>=0){ dn.innerHTML='接近'+tname+'目标。蛋白差 <b>'+Math.max(0,T.p-tp)+'g</b>。'; }
+    else { dn.innerHTML='今天超了 <b>'+(-rem)+' kcal</b>。'+(d.dtype==='free'||d.dtype==='refeed'?'补碳/自由日超一点没关系,别连着来。':'明天补回,或今晚多走2000步。'); }
     // weight/steps/note
     document.getElementById('wIn').value=d.w||'';
     document.getElementById('stepIn').value=d.steps||'';
@@ -653,14 +614,38 @@
     document.getElementById(k+'Bar').style.width=pct+'%';
     if(val>tgt*1.1) document.getElementById(k+'Bar').style.background='var(--danger)';
   }
+  function renderDtype(){
+    const row=document.getElementById('dtypeRow'); row.innerHTML='';
+    const d=getDay(curDay);
+    DTYPE_ORDER.forEach(t=>{
+      const o=DAYTYPE[t];
+      const b=document.createElement('button');
+      b.dataset.t=t;
+      b.className=(d.dtype===t?'on':'');
+      b.innerHTML=o.name+'<small>'+o.kcal+' kcal</small>';
+      b.onclick=()=>{ d.dtype=t; save(); renderToday(); };
+      row.appendChild(b);
+    });
+    const hint=document.getElementById('dtypeHint');
+    const o=DAYTYPE[d.dtype]||DAYTYPE.rest;
+    let extra='';
+    if(isRefeedCand(curDay) && d.dtype!=='refeed'){
+      extra=' <b style="color:var(--carb)">📌 第'+curDay+'天是补碳候选(每~12天一次)——若今天练大重量/腿,可点「补碳日」。</b>';
+    }
+    hint.innerHTML=o.tip+extra;
+  }
   function renderProg30(){
     const p=document.getElementById('prog30'); p.innerHTML='';
-    for(let i=1;i<=30;i++){
+    for(let i=1;i<=CYCLE;i++){
       const d=DB.days[dayKey(i)];
       const logged = d && ((d.foods&&d.foods.length)|| d.w || Object.keys(d.checks||{}).some(k=>d.checks[k]));
+      const dt = d && d.dtype;
       const el=document.createElement('div');
-      el.className='d'+(logged?' logged':'')+(i===curDay?' today':'');
+      el.className='d'+(logged?' logged':'')+(i===curDay?' today':'')
+        +(isRefeedCand(i)?' refeedcand':'')
+        +(dt==='train'?' t-train':'')+(dt==='refeed'?' t-refeed':'')+(dt==='free'?' t-free':'');
       el.textContent=i;
+      el.title='Day '+i+(dt?' · '+(DAYTYPE[dt]||{}).name:'')+(isRefeedCand(i)?' · 补碳候选':'');
       el.onclick=()=>{curDay=i;renderToday();};
       p.appendChild(el);
     }
@@ -679,86 +664,6 @@
       fl.appendChild(el);
     });
   }
-  function toGrams(qty,unit){
-    if(unit==='lb') return qty*453.592;
-    if(unit==='oz') return qty*28.3495;
-    if(unit==='serving') return qty*100; // 份按100g基准,用户可调每100g值
-    return qty;
-  }
-  function computePreview(){
-    const qty=parseFloat(document.getElementById('fQty').value)||0;
-    const unit=document.getElementById('fUnit').value;
-    const k100=parseFloat(document.getElementById('fKcal100').value)||0;
-    const g=toGrams(qty,unit);
-    const kcal=k100*g/100;
-    document.getElementById('calcPreview').textContent = qty? ('≈ '+Math.round(kcal)+' kcal ('+Math.round(g)+'g)') : '';
-  }
-
-  // db chips —— 先主菜整份,再按分类的单品
-  function renderChips(){
-    const c=document.getElementById('dbChips'); c.innerHTML='';
-    // 主菜整份快捷:点一下直接加一整份到今天
-    const mealWrap=document.createElement('div');
-    mealWrap.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin:2px 0 6px">一键加整份主菜(点=直接加入今天)</div>';
-    MEALS.forEach(m=>{
-      const el=document.createElement('span'); el.className='dbchip';
-      el.style.borderColor='var(--accent)';
-      el.innerHTML=m.n+' <span class="kc" style="color:var(--accent)">'+m.kcal+'</span>';
-      el.onclick=()=>{
-        const d=getDay(curDay);
-        d.foods.push({name:m.n,qty:1,unit:'份',kcal:m.kcal,p:m.p,c:m.c,f:m.f});
-        save(); renderToday();
-        document.querySelector('.tab[data-view="today"]').click();
-      };
-      mealWrap.appendChild(el);
-    });
-    c.appendChild(mealWrap);
-
-    // 单品分类
-    const tags=['蛋白','主食','酱菜','蔬菜','水果','脂肪'];
-    tags.forEach(tag=>{
-      const items=FOODDB.filter(f=>f.tag===tag);
-      if(!items.length) return;
-      const wrap=document.createElement('div');
-      wrap.innerHTML='<div style="font-family:var(--mono);font-size:10.5px;color:var(--dim);margin:10px 0 5px">'+tag+'(每100g,点填入后输克重)</div>';
-      items.forEach(f=>{
-        const el=document.createElement('span'); el.className='dbchip';
-        el.innerHTML=f.n+' <span class="kc">'+f.kcal+'</span>';
-        el.onclick=()=>{
-          document.getElementById('fName').value=f.n;
-          document.getElementById('fKcal100').value=f.kcal;
-          document.getElementById('fP100').value=f.p;
-          document.getElementById('fC100').value=f.c;
-          document.getElementById('fF100').value=f.f;
-          document.getElementById('fQty').focus();
-          computePreview();
-        };
-        wrap.appendChild(el);
-      });
-      c.appendChild(wrap);
-    });
-  }
-
-  document.getElementById('addFoodBtn').onclick=()=>{
-    const name=document.getElementById('fName').value.trim()||'食物';
-    const qty=parseFloat(document.getElementById('fQty').value)||0;
-    const unit=document.getElementById('fUnit').value;
-    const k100=parseFloat(document.getElementById('fKcal100').value)||0;
-    const p100=parseFloat(document.getElementById('fP100').value)||0;
-    const c100=parseFloat(document.getElementById('fC100').value)||0;
-    const f100=parseFloat(document.getElementById('fF100').value)||0;
-    if(qty<=0||k100<=0){ alert('请填数量和每100g热量'); return; }
-    const g=toGrams(qty,unit);
-    const d=getDay(curDay);
-    d.foods.push({name,qty,unit,kcal:k100*g/100,p:p100*g/100,c:c100*g/100,f:f100*g/100});
-    save();
-    ['fName','fQty','fKcal100','fP100','fC100','fF100'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('calcPreview').textContent='';
-    renderToday();
-    // switch to today so they see it accumulate
-    document.querySelector('.tab[data-view="today"]').click();
-  };
-  ['fQty','fUnit','fKcal100'].forEach(id=>document.getElementById(id).addEventListener('input',computePreview));
 
   // ---------- combo 快速录入 ----------
   let cbEditIdx=null;
@@ -916,7 +821,7 @@
     const wrap=document.getElementById('chartWrap');
     const emp=document.getElementById('chartEmpty');
     const pts=[];
-    for(let i=1;i<=30;i++){
+    for(let i=1;i<=CYCLE;i++){
       const d=DB.days[dayKey(i)];
       if(!d||!d.workouts) continue;
       let val=0;
@@ -948,7 +853,7 @@
       +dots+labels+'</svg>';
   }
   document.getElementById('wPrevDay').onclick=()=>{ if(curDay>1){curDay--;renderWorkout();renderToday();} };
-  document.getElementById('wNextDay').onclick=()=>{ if(curDay<30){curDay++;renderWorkout();renderToday();} };
+  document.getElementById('wNextDay').onclick=()=>{ if(curDay<CYCLE){curDay++;renderWorkout();renderToday();} };
 
   // save day meta
   document.getElementById('saveDayBtn').onclick=()=>{
@@ -963,10 +868,10 @@
 
   // day nav
   document.getElementById('prevDay').onclick=()=>{ if(curDay>1){curDay--;renderToday();} };
-  document.getElementById('nextDay').onclick=()=>{ if(curDay<30){curDay++;renderToday();} };
+  document.getElementById('nextDay').onclick=()=>{ if(curDay<CYCLE){curDay++;renderToday();} };
   document.getElementById('todayBtn').onclick=()=>{
     const diff=Math.floor((new Date()-new Date(DB.start+'T00:00:00'))/86400000)+1;
-    curDay=Math.min(Math.max(diff,1),30); renderToday();
+    curDay=Math.min(Math.max(diff,1),CYCLE); renderToday();
   };
 
   // ---------- measurements ----------
@@ -1023,10 +928,10 @@
     if(DB.measures.length===0){ g.innerHTML=''; return; }
     const first=DB.measures[0], last=DB.measures[DB.measures.length-1];
     const cards=[
-      {label:'当前体重',k:'w',unit:'kg',target:71},
-      {label:'腰围',k:'waist',unit:'cm',target:null},
-      {label:'体脂',k:'bf',unit:'%',target:17},
-      {label:'胸围',k:'chest',unit:'cm',target:null}
+      {label:'当前体重',k:'w',unit:'kg',target:72},
+      {label:'腹围(脐)',k:'belly',unit:'cm',target:80},
+      {label:'体脂',k:'bf',unit:'%',target:13},
+      {label:'腰围',k:'waist',unit:'cm',target:null}
     ];
     g.innerHTML='';
     cards.forEach(c=>{
@@ -1053,6 +958,11 @@
       const v=document.getElementById(id).value;
       rec[k]= v===''?'':parseFloat(v);
     });
+    // 体脂留空且有颈围+腹围时,用海军公式自动算(男性量脐水平=腹围)
+    if((rec.bf===''||rec.bf==null) && rec.neck && rec.belly){
+      const bf=navyBF(rec.belly,rec.neck,PROFILE.height);
+      if(bf!=null) rec.bf=parseFloat(bf.toFixed(1));
+    }
     if(mEditIdx!==null){
       DB.measures[mEditIdx]=rec;   // 更新已有
     } else {
@@ -1065,6 +975,65 @@
     setTimeout(()=>document.getElementById('addMeasureBtn').textContent='保存这条测量',1200);
   };
 
+  // ---------- plan: 实时计算器 + 日类型表 ----------
+  function num(v){ return (v!=null&&v!==''&&!isNaN(v))?parseFloat(v):null; }
+  function navyBF(waistNavel,neck,height){
+    if(!waistNavel||!neck||!height||waistNavel<=neck) return null;
+    const v=1.0324 - 0.19077*Math.log10(waistNavel-neck) + 0.15456*Math.log10(height);
+    return 495/v - 450;
+  }
+  function latestMeasure(){ return DB.measures && DB.measures.length ? DB.measures[DB.measures.length-1] : null; }
+  function renderCalc(){
+    const g=document.getElementById('calcGrid'); const note=document.getElementById('calcNote');
+    if(!g) return;
+    const m=latestMeasure();
+    if(!m){ g.innerHTML='<div class="empty">先去「测量对比」加一条记录</div>'; note.textContent=''; return; }
+    const w=num(m.w)||num(BASELINE.w);
+    const neck=num(m.neck)||num(BASELINE.neck);
+    const belly=num(m.belly)||num(m.waist);           // 海军法男性量脐水平=腹围
+    const H=PROFILE.height, age=PROFILE.age;
+    let bf=navyBF(belly,neck,H);
+    if(bf==null) bf=num(m.bf);
+    const lbm = (bf!=null)? w*(1-bf/100) : null;
+    const bmrK = lbm!=null? 370+21.6*lbm : null;      // Katch-McArdle
+    const bmrM = 10*w + 6.25*H - 5*age + 5;           // Mifflin-St Jeor
+    const bmr = bmrK!=null? bmrK : bmrM;
+    const ACT = 1.375;                                 // 久坐 + 每周3-4练
+    const tdee = bmr*ACT;
+    const cut = Math.round((tdee-350)/50)*50;          // 推荐日均,约350赤字
+    const cards=[
+      {l:'体脂率 (Navy海军法)',v:bf!=null?bf.toFixed(1):'–',u:'%'},
+      {l:'瘦体重 LBM',v:lbm!=null?lbm.toFixed(1):'–',u:'kg'},
+      {l:'脂肪量',v:(bf!=null)?(w-lbm).toFixed(1):'–',u:'kg'},
+      {l:'BMR 基础代谢',v:Math.round(bmr),u:'kcal'},
+      {l:'TDEE 维持热量',v:Math.round(tdee),u:'kcal'},
+      {l:'推荐日均目标',v:cut,u:'kcal'}
+    ];
+    g.innerHTML='';
+    cards.forEach(c=>{
+      const el=document.createElement('div'); el.className='stat';
+      el.innerHTML='<div class="s-label">'+c.l+'</div><div class="s-val">'+c.v+'<span style="font-size:12px;color:var(--muted)"> '+c.u+'</span></div>';
+      g.appendChild(el);
+    });
+    note.innerHTML='基于最新测量(体重'+w+'kg · 脐腹围'+belly+' · 颈'+neck+' · 身高'+H+'cm)。'
+      +'BMR用Katch-McArdle(含体脂,最准);TDEE=BMR×1.375(久坐+每周3-4练);推荐目标≈TDEE−350。'
+      +'<b>周均~2000kcal即按此设,训练日+150/休息日−150。</b>体重掉到72kg左右时TDEE会下降约100-150,那时把日目标同步下调即可。';
+  }
+  function renderDtypeTable(){
+    const tbl=document.getElementById('dtypeTable'); if(!tbl) return;
+    let head='<tr><th>指标</th>';
+    DTYPE_ORDER.forEach(t=>head+='<th>'+DAYTYPE[t].name+'</th>');
+    head+='</tr>';
+    const rows=[['kcal','热量 kcal'],['p','蛋白 g'],['c','碳水 g'],['f','脂肪 g']];
+    let body='';
+    rows.forEach(([k,lab])=>{
+      body+='<tr><td>'+lab+'</td>';
+      DTYPE_ORDER.forEach(t=>{ const v=DAYTYPE[t][k]; body+='<td>'+(v===''?'自由':v)+'</td>'; });
+      body+='</tr>';
+    });
+    tbl.innerHTML=head+body;
+  }
+
   // ---------- tabs ----------
   document.querySelectorAll('.tab').forEach(t=>{
     t.onclick=()=>{
@@ -1075,6 +1044,7 @@
       if(t.dataset.view==='measure') renderMeasures();
       if(t.dataset.view==='workout') renderWorkout();
       if(t.dataset.view==='food') renderComboLib();
+      if(t.dataset.view==='plan'){ renderCalc(); renderDtypeTable(); }
       window.scrollTo({top:0,behavior:'smooth'});
     };
   });
@@ -1096,8 +1066,8 @@
         if(!obj.days||!obj.measures){ alert('文件格式不对'); return; }
         DB=obj; if(!DB.combos) DB.combos=[]; rawSet(JSON.stringify(DB));
         const diff=Math.floor((new Date()-new Date(DB.start+'T00:00:00'))/86400000)+1;
-        curDay=Math.min(Math.max(diff,1),30);
-        renderChips(); renderToday(); renderMeasures(); renderComboLib();
+        curDay=Math.min(Math.max(diff,1),CYCLE);
+        renderToday(); renderMeasures(); renderComboLib();
         alert('✓ 存档已导入,数据已恢复');
       }catch(err){ alert('读取失败:'+err.message); }
     };
@@ -1106,17 +1076,17 @@
   document.getElementById('resetBtn').onclick=()=>{
     if(confirm('确定清空所有记录?建议先导出备份。此操作不可撤销。')){
       DB={start:new Date().toISOString().slice(0,10),days:{},measures:[],combos:[]};
-      DB.measures.push({label:'Day 1 基线', w:75.35, bf:19, waist:94, belly:89, chest:87, hip:97, arm:28, thigh:54, neck:36});
+      DB.measures.push(Object.assign({}, BASELINE));
       rawSet(JSON.stringify(DB));
-      curDay=1; renderChips(); renderToday(); renderMeasures(); renderComboLib();
+      curDay=1; renderToday(); renderMeasures(); renderComboLib();
     }
   };
 
   // ---------- init ----------
   load().then(()=>{
     const diff=Math.floor((new Date()-new Date(DB.start+'T00:00:00'))/86400000)+1;
-    curDay=Math.min(Math.max(diff,1),30);
-    renderChips(); renderToday(); renderMeasures(); renderComboLib();
+    curDay=Math.min(Math.max(diff,1),CYCLE);
+    renderToday(); renderMeasures(); renderComboLib();
   });
 })();
 </script>
