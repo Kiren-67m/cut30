@@ -93,8 +93,8 @@
   /* number inputs */
   .field{margin-bottom:12px}
   .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
-  input,select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:11px 12px;font-size:14px;font-family:var(--sans)}
-  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:11px 12px;font-size:14px;font-family:var(--sans)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
   input::placeholder{color:var(--dim)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -213,6 +213,7 @@
     <button class="tab" data-view="food">热量计算</button>
     <button class="tab" data-view="workout">健身</button>
     <button class="tab" data-view="measure">测量对比</button>
+    <button class="tab" data-view="inv">库存</button>
     <button class="tab" data-view="plan">计划</button>
   </div>
 
@@ -538,6 +539,38 @@
       <div class="note" style="margin-top:12px"><b>重要</b>:如果顶部出现「⚠ 浏览器未存」,说明你的浏览器禁止了本地存储(常见于iPhone隐私模式或Safari防护)。这时<b>每次记完数据点「导出存档」存到手机</b>,换设备或数据丢了就「导入存档」读回来。数据只在你手里,不上传。</div>
     </div>
   </div>
+
+  <!-- ============ 库存·日志 ============ -->
+  <div class="view" id="view-inv">
+    <div class="card">
+      <h2>🥗 食材库存</h2>
+      <div class="hint">实时改:✏️改数量 · 🛒标需补货 · ✕删。下面「加食材」新增。已预填你现在的库存。</div>
+      <div id="invList"></div>
+      <div style="border-top:1px solid var(--line);margin:16px 0 12px"></div>
+      <div class="grid3">
+        <div class="field"><label>食材名</label><input type="text" id="invName" placeholder="例:鸡胸"></div>
+        <div class="field"><label>数量</label><input type="text" id="invAmt" placeholder="例:90g / 2片 / 1袋"></div>
+        <div class="field"><label>分类</label>
+          <select id="invCat"><option>蛋白</option><option>碳水</option><option>蔬菜</option><option>水果</option><option>脂肪</option><option>酱料</option><option>其他</option></select>
+        </div>
+      </div>
+      <button class="btn sm" id="invAddBtn">➕ 加食材</button>
+    </div>
+
+    <div class="card">
+      <h2>🛒 补货清单</h2>
+      <div class="hint">下面是你标了「需补货」的——去超市照着买</div>
+      <div id="restockList"></div>
+    </div>
+
+    <div class="card">
+      <h2>📝 备注 / 日志</h2>
+      <div class="hint">随手记:练感、馋不馋、身体反应、想法…自动带日期,最新在上</div>
+      <div class="field"><textarea id="logText" rows="2" placeholder="写点什么…"></textarea></div>
+      <button class="btn sm" id="logAddBtn">添加</button>
+      <div id="logList" style="margin-top:14px"></div>
+    </div>
+  </div>
 </div>
 
 <div class="footer-save">
@@ -550,6 +583,28 @@
   const CYCLE = 84;                 // 12周重组周期
   const PROFILE = { height:185, age:21, sex:'M' };  // 身高cm/年龄/性别
   const BASELINE = { label:'Day 1 基线', w:74.45, bf:17, waist:78, belly:86, chest:'', hip:'', arm:'', thigh:'', neck:36 };
+
+  // 食材库存初始值(打开即用,可随时改)
+  const SEED_INV = [
+    {name:'鸡胸(鲜)',amt:'~90g',cat:'蛋白',need:true},
+    {name:'牛排',amt:'8片 ~530g',cat:'蛋白',need:false},
+    {name:'鸡蛋',amt:'3个',cat:'蛋白',need:true},
+    {name:'蛋白粉 Orgain',amt:'~175g',cat:'蛋白',need:false},
+    {name:'无乳糖牛奶',amt:'~0.66L',cat:'蛋白',need:false},
+    {name:'希腊酸奶',amt:'0 没了',cat:'蛋白',need:true},
+    {name:'燕麦',amt:'~100g',cat:'碳水',need:false},
+    {name:'吐司',amt:'0 发霉',cat:'碳水',need:true},
+    {name:'千层 Lasagna',amt:'2片',cat:'碳水',need:false},
+    {name:'香蕉',amt:'2根',cat:'水果',need:true},
+    {name:'冷冻蓝莓',amt:'~850g',cat:'水果',need:false},
+    {name:'冷冻蔬菜包',amt:'~1大包',cat:'蔬菜',need:false},
+    {name:'彩椒',amt:'0/剩2颗',cat:'蔬菜',need:true},
+    {name:'洋葱',amt:'充足',cat:'蔬菜',need:false},
+    {name:'牛油果',amt:'~3个',cat:'脂肪',need:false},
+    {name:'花生酱',amt:'1罐',cat:'脂肪',need:false},
+    {name:'Prego酱',amt:'~2份',cat:'酱料',need:false}
+  ];
+  function seedInv(){ return SEED_INV.map(x=>Object.assign({},x)); }
 
   // 日类型营养目标(见计划页计算)
   const DAYTYPE = {
@@ -579,6 +634,8 @@
     if(!DB.days) DB.days={};
     if(!DB.measures) DB.measures=[];
     if(!DB.combos) DB.combos=[];
+    if(!DB.inventory) DB.inventory=seedInv();
+    if(!DB.logs) DB.logs=[];
     if(DB.measures.length===0){
       DB.measures.push(Object.assign({}, BASELINE));
       rawSet(JSON.stringify(DB));
@@ -1108,6 +1165,70 @@
     tbl.innerHTML=head+body;
   }
 
+  // ---------- 库存 · 日志 ----------
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  const INV_CATS=['蛋白','碳水','蔬菜','水果','脂肪','酱料','其他'];
+  function renderInv(){
+    const w=document.getElementById('invList'); if(!w) return; w.innerHTML='';
+    if(!DB.inventory||!DB.inventory.length){ w.innerHTML='<div class="empty">还没有食材,下面「加食材」</div>'; return; }
+    INV_CATS.forEach(cat=>{
+      const items=DB.inventory.map((it,idx)=>({it,idx})).filter(x=>x.it.cat===cat);
+      if(!items.length) return;
+      const h=document.createElement('div');
+      h.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin:12px 0 6px">'+cat+'</div>';
+      w.appendChild(h);
+      items.forEach(({it,idx})=>{
+        const el=document.createElement('div'); el.className='foodline';
+        if(it.need) el.style.borderColor='var(--accent2)';
+        el.innerHTML='<div class="fl-main"><span class="fl-name">'+esc(it.name)+(it.need?' 🛒':'')+'</span><span class="fl-detail">'+esc(it.amt)+'</span></div>'
+          +'<div class="fl-right"><button class="del" title="改数量">✏️</button><button class="del" title="需补货开关">🛒</button><button class="del" title="删除">✕</button></div>';
+        const btns=el.querySelectorAll('.del');
+        btns[0].onclick=()=>{ const v=prompt('数量('+it.name+')',it.amt); if(v!=null){ it.amt=v.trim(); save(); renderInv(); renderRestock(); } };
+        btns[1].onclick=()=>{ it.need=!it.need; save(); renderInv(); renderRestock(); };
+        btns[2].onclick=()=>{ if(confirm('删除「'+it.name+'」?')){ DB.inventory.splice(idx,1); save(); renderInv(); renderRestock(); } };
+        w.appendChild(el);
+      });
+    });
+  }
+  function renderRestock(){
+    const w=document.getElementById('restockList'); if(!w) return; w.innerHTML='';
+    const need=(DB.inventory||[]).filter(it=>it.need);
+    if(!need.length){ w.innerHTML='<div class="empty">暂时没有需补货的 ✅</div>'; return; }
+    need.forEach(it=>{
+      const el=document.createElement('div'); el.className='foodline';
+      el.innerHTML='<div class="fl-main"><span class="fl-name">🛒 '+esc(it.name)+'</span><span class="fl-detail">'+esc(it.cat)+' · 现:'+esc(it.amt)+'</span></div>';
+      w.appendChild(el);
+    });
+  }
+  function renderLogs(){
+    const w=document.getElementById('logList'); if(!w) return; w.innerHTML='';
+    if(!DB.logs||!DB.logs.length){ w.innerHTML='<div class="empty">还没有备注</div>'; return; }
+    DB.logs.forEach((lg,idx)=>{
+      const el=document.createElement('div'); el.className='foodline';
+      el.innerHTML='<div class="fl-main"><span class="fl-detail" style="color:var(--dim)">'+esc(lg.ts)+'</span><span class="fl-name" style="font-weight:500;white-space:pre-wrap">'+esc(lg.text)+'</span></div><div class="fl-right"><button class="del" title="删除">✕</button></div>';
+      el.querySelector('.del').onclick=()=>{ if(confirm('删除这条备注?')){ DB.logs.splice(idx,1); save(); renderLogs(); } };
+      w.appendChild(el);
+    });
+  }
+  document.getElementById('invAddBtn').onclick=()=>{
+    const name=document.getElementById('invName').value.trim();
+    const amt=document.getElementById('invAmt').value.trim();
+    const cat=document.getElementById('invCat').value;
+    if(!name){ alert('填个食材名'); return; }
+    DB.inventory.push({name,amt:amt||'—',cat,need:false});
+    save();
+    document.getElementById('invName').value=''; document.getElementById('invAmt').value='';
+    renderInv(); renderRestock();
+  };
+  document.getElementById('logAddBtn').onclick=()=>{
+    const t=document.getElementById('logText').value.trim();
+    if(!t) return;
+    const now=new Date();
+    const ts=now.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' '+now.toTimeString().slice(0,5);
+    DB.logs.unshift({ts,text:t});
+    save(); document.getElementById('logText').value=''; renderLogs();
+  };
+
   // ---------- tabs ----------
   document.querySelectorAll('.tab').forEach(t=>{
     t.onclick=()=>{
@@ -1119,6 +1240,7 @@
       if(t.dataset.view==='workout') renderWorkout();
       if(t.dataset.view==='food') renderComboLib();
       if(t.dataset.view==='plan'){ renderCalc(); renderDtypeTable(); }
+      if(t.dataset.view==='inv'){ renderInv(); renderRestock(); renderLogs(); }
       window.scrollTo({top:0,behavior:'smooth'});
     };
   });
@@ -1138,10 +1260,10 @@
       try{
         const obj=JSON.parse(reader.result);
         if(!obj.days||!obj.measures){ alert('文件格式不对'); return; }
-        DB=obj; if(!DB.combos) DB.combos=[]; rawSet(JSON.stringify(DB));
+        DB=obj; if(!DB.combos) DB.combos=[]; if(!DB.inventory) DB.inventory=seedInv(); if(!DB.logs) DB.logs=[]; rawSet(JSON.stringify(DB));
         const diff=Math.floor((new Date()-new Date(DB.start+'T00:00:00'))/86400000)+1;
         curDay=Math.min(Math.max(diff,1),CYCLE);
-        renderToday(); renderMeasures(); renderComboLib();
+        renderToday(); renderMeasures(); renderComboLib(); renderInv(); renderRestock(); renderLogs();
         alert('✓ 存档已导入,数据已恢复');
       }catch(err){ alert('读取失败:'+err.message); }
     };
@@ -1149,10 +1271,10 @@
   };
   document.getElementById('resetBtn').onclick=()=>{
     if(confirm('确定清空所有记录?建议先导出备份。此操作不可撤销。')){
-      DB={start:new Date().toISOString().slice(0,10),days:{},measures:[],combos:[]};
+      DB={start:new Date().toISOString().slice(0,10),days:{},measures:[],combos:[],inventory:seedInv(),logs:[]};
       DB.measures.push(Object.assign({}, BASELINE));
       rawSet(JSON.stringify(DB));
-      curDay=1; renderToday(); renderMeasures(); renderComboLib();
+      curDay=1; renderToday(); renderMeasures(); renderComboLib(); renderInv(); renderRestock(); renderLogs();
     }
   };
 
