@@ -127,6 +127,14 @@
   .dbchip:hover{border-color:var(--accent);color:var(--accent)}
   .dbchip .kc{font-family:var(--mono);color:var(--dim);font-size:10.5px}
 
+  /* exercise presets (from plan) */
+  .exgrp{margin-bottom:8px}
+  .exgrp .exgrp-lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--accent);margin-bottom:5px;font-weight:600}
+  .exgrp .exgrp-chips{display:flex;flex-wrap:wrap;gap:4px}
+  .exchip{display:inline-flex;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:6px 11px;font-size:12px;cursor:pointer;transition:.15s;color:var(--ink)}
+  .exchip:hover{border-color:var(--accent);color:var(--accent)}
+  .exchip.on{border-color:var(--accent);background:#12261f;color:var(--accent)}
+
   /* measurement table */
   .mtable{width:100%;border-collapse:collapse;font-size:12.5px}
   .mtable th,.mtable td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);font-family:var(--mono)}
@@ -322,6 +330,10 @@
       <div class="field"><label>动作名称</label><input type="text" id="exName" placeholder="例:坐姿前推 / 跑步机 / Zone2快走"></div>
 
       <div id="strengthFields">
+        <div class="field" style="margin-bottom:10px">
+          <label>从计划里选动作(点一下自动填名称,重量组数自己填)</label>
+          <div id="exPresets"></div>
+        </div>
         <div class="grid3">
           <div class="field"><label>组数</label><input type="number" id="exSets" placeholder="3"></div>
           <div class="field"><label>次数/组</label><input type="number" id="exReps" placeholder="12"></div>
@@ -763,6 +775,29 @@
 
   // ---------- workout 健身 ----------
   let curType='strength', chartType='strength', exEditIdx=null;
+
+  // 计划里的动作,做成快选(点一下填名称,重量/组数自己填)
+  const EX_PRESETS=[
+    {grp:'🅰 推 · 胸/肩/三头', items:['胸推','龙门架夹胸','坐姿哑铃推肩','侧平举','三头绳索下压']},
+    {grp:'🅱 拉 · 背/二头/后肩', items:['高位下拉','坐姿划船','面拉','哑铃弯举','锤式弯举']},
+    {grp:'🅲 腿+核心', items:['高脚杯深蹲','哑铃罗马尼亚硬拉','保加利亚分腿蹲','站姿提踵','平板支撑']}
+  ];
+  function renderExPresets(){
+    const wrap=document.getElementById('exPresets'); if(!wrap) return;
+    const cur=document.getElementById('exName').value.trim();
+    wrap.innerHTML='';
+    EX_PRESETS.forEach(g=>{
+      const gd=document.createElement('div'); gd.className='exgrp';
+      let chips='';
+      g.items.forEach(n=>{ chips+='<span class="exchip'+(n===cur?' on':'')+'">'+n+'</span>'; });
+      gd.innerHTML='<div class="exgrp-lab">'+g.grp+'</div><div class="exgrp-chips">'+chips+'</div>';
+      gd.querySelectorAll('.exchip').forEach((el,i)=>{
+        el.onclick=()=>{ document.getElementById('exName').value=g.items[i]; renderExPresets(); document.getElementById('exSets').focus(); };
+      });
+      wrap.appendChild(gd);
+    });
+  }
+  document.getElementById('exName').addEventListener('input',renderExPresets);
   document.querySelectorAll('.typeBtn').forEach(b=>{
     b.onclick=()=>{
       document.querySelectorAll('.typeBtn').forEach(x=>x.classList.remove('active'));
@@ -775,6 +810,7 @@
     ['exName','exSets','exReps','exWeight','exDur','exHr','exDist','exNote'].forEach(id=>document.getElementById(id).value='');
     exEditIdx=null; document.getElementById('exEditHint').textContent='';
     document.getElementById('exAddBtn').textContent='保存这组';
+    renderExPresets();
   }
   document.getElementById('exAddBtn').onclick=()=>{
     const name=document.getElementById('exName').value.trim();
@@ -802,6 +838,7 @@
   function renderWorkout(){
     document.getElementById('wDayNum').textContent='Day '+curDay;
     document.getElementById('wDayDate').textContent=dateForDay(curDay);
+    renderExPresets();
     const d=getDay(curDay);
     const list=document.getElementById('exList'); list.innerHTML='';
     if(!d.workouts.length){ list.innerHTML='<div class="empty">今天还没记录训练</div>'; }
