@@ -330,7 +330,7 @@
       <div class="field"><label>动作名称</label><input type="text" id="exName" placeholder="例:坐姿前推 / 跑步机 / Zone2快走"></div>
 
       <div id="strengthFields">
-        <div class="field" style="margin-bottom:10px">
+        <div class="field" id="exPresetWrap" style="margin-bottom:10px;display:none">
           <label>从计划里选动作(点一下自动填名称,重量组数自己填)</label>
           <div id="exPresets"></div>
         </div>
@@ -804,6 +804,8 @@
       b.classList.add('active'); curType=b.dataset.type;
       document.getElementById('strengthFields').style.display = curType==='strength'?'block':'none';
       document.getElementById('cardioFields').style.display = curType==='cardio'?'block':'none';
+      document.getElementById('exPresetWrap').style.display = curType==='strength'?'block':'none';
+      if(curType==='strength') renderExPresets();
     };
   });
   function exClear(){
