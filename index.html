@@ -586,23 +586,25 @@
 
   // 食材库存初始值(打开即用,可随时改)
   const SEED_INV = [
-    {name:'鸡胸(鲜)',amt:'~90g',cat:'蛋白',need:true},
-    {name:'牛排',amt:'8片 ~530g',cat:'蛋白',need:false},
-    {name:'鸡蛋',amt:'3个',cat:'蛋白',need:true},
-    {name:'蛋白粉 Orgain',amt:'~175g',cat:'蛋白',need:false},
-    {name:'无乳糖牛奶',amt:'~0.66L',cat:'蛋白',need:false},
-    {name:'希腊酸奶',amt:'0 没了',cat:'蛋白',need:true},
-    {name:'燕麦',amt:'~100g',cat:'碳水',need:false},
-    {name:'吐司',amt:'0 发霉',cat:'碳水',need:true},
-    {name:'千层 Lasagna',amt:'2片',cat:'碳水',need:false},
-    {name:'香蕉',amt:'2根',cat:'水果',need:true},
+    {name:'鸡胸(鲜)',amt:'~1861g(~4.1磅)',cat:'蛋白',need:false},
+    {name:'牛排(薄切·旧剩)',amt:'剩几片-自己核',cat:'蛋白',need:false},
+    {name:'93/7牛肉馅(山姆)',amt:'3.14磅/3块(~1424g)',cat:'蛋白',need:false},
+    {name:'鸡蛋',amt:'18个',cat:'蛋白',need:false},
+    {name:'Premier蛋白粉',amt:'663g(2勺=P30)',cat:'蛋白',need:false},
+    {name:'蛋白粉Orgain(旧)',amt:'~175g',cat:'蛋白',need:false},
+    {name:'无乳糖牛奶',amt:'~2L',cat:'蛋白',need:false},
+    {name:'希腊酸奶(GV香草)',amt:'32oz',cat:'蛋白',need:false},
+    {name:"全麦面包 Nature's Own",amt:'1整包(22片·60/片)',cat:'碳水',need:false},
+    {name:'燕麦',amt:'1袋+旧剩~100g',cat:'碳水',need:false},
+    {name:'千层Lasagna',amt:'2片',cat:'碳水',need:false},
+    {name:'香蕉',amt:'7根',cat:'水果',need:false},
     {name:'冷冻蓝莓',amt:'~850g',cat:'水果',need:false},
-    {name:'冷冻蔬菜包',amt:'~1大包',cat:'蔬菜',need:false},
-    {name:'彩椒',amt:'0/剩2颗',cat:'蔬菜',need:true},
-    {name:'洋葱',amt:'充足',cat:'蔬菜',need:false},
+    {name:'冷冻西兰花mix(山姆Normandy)',amt:'4包×454g',cat:'蔬菜',need:false},
+    {name:'彩椒',amt:'1袋(681g)',cat:'蔬菜',need:false},
+    {name:'洋葱',amt:'2颗',cat:'蔬菜',need:false},
     {name:'牛油果',amt:'~3个',cat:'脂肪',need:false},
     {name:'花生酱',amt:'1罐',cat:'脂肪',need:false},
-    {name:'Prego酱',amt:'~2份',cat:'酱料',need:false}
+    {name:'Prego酱',amt:'1/3罐',cat:'酱料',need:false}
   ];
   function seedInv(){ return SEED_INV.map(x=>Object.assign({},x)); }
 
